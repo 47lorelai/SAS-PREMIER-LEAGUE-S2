@@ -1,1 +1,120 @@
-<!doctype html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07111c"><title>SAS Premier League — Season 2</title><link rel="stylesheet" href="style.css"></head><body><div id="app"></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#06101a">
+<title>SAS Premier League Season 2</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg"></div>
+<header class="topbar">
+  <button class="brand" data-page="home"><span class="crown">♛</span><span>SAS <small>PREMIER LEAGUE</small><b>SEASON 2</b></span></button>
+  <button class="hamb" id="hamb">☰</button>
+  <nav id="nav">
+    <button class="nav active" data-page="home">⌂ <span>Home</span></button>
+    <button class="nav" data-page="table">🏆 <span>League Table</span></button>
+    <button class="nav" data-page="fixtures">📅 <span>Fixtures</span></button>
+    <button class="nav" data-page="results">⚽ <span>Results</span></button>
+    <button class="nav" data-page="teams">👥 <span>Teams</span></button>
+    <button class="nav" data-page="stats">📊 <span>Statistics</span></button>
+    <button class="nav" data-page="gallery">▣ <span>Gallery</span></button>
+    <button class="nav" data-page="about">ⓘ <span>About</span></button>
+  </nav>
+  <div class="status"><i></i><span id="last">Live</span></div>
+</header>
+<main id="app"></main>
+<footer><strong>SAS PREMIER LEAGUE SEASON 2</strong><span>⚽ Bola • Persahabatan • Kita • Bersama</span><span>© 2026</span></footer>
+<script>
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRo7Dq0F36firHtLRt8zSNvMMeuewxiaSu7iCPpiSyQFtWI6WpUhxMZrXfa2-cqcU6nuZrYmSIht4Cc/pub?gid=1580015281&single=true&output=csv';
+const TEAMS = ["SAS FC","SABAH FC","LANGGAR FC","TANGKI FC","T-REX NAZARIO"];
+const LOGOS = {
+ "SAS FC":"assets/teams/sas-fc.png",
+ "SABAH FC":"assets/teams/sabah-fc.png",
+ "LANGGAR FC":"assets/teams/langgar-fc.png",
+ "TANGKI FC":"assets/teams/tangki-fc.png",
+ "T-REX NAZARIO":"assets/teams/trex-nazario.svg"
+};
+const FIXTURES = [("MD1", "SAS FC", "SABAH FC"), ("MD1", "LANGGAR FC", "TANGKI FC"), ("MD2", "T-REX NAZARIO", "SAS FC"), ("MD2", "SABAH FC", "LANGGAR FC"), ("MD3", "TANGKI FC", "T-REX NAZARIO"), ("MD3", "SAS FC", "LANGGAR FC"), ("MD4", "SABAH FC", "TANGKI FC"), ("MD4", "LANGGAR FC", "T-REX NAZARIO"), ("MD5", "TANGKI FC", "SAS FC"), ("MD5", "T-REX NAZARIO", "SABAH FC"), ("MD6", "SABAH FC", "SAS FC"), ("MD6", "TANGKI FC", "LANGGAR FC"), ("MD7", "SAS FC", "T-REX NAZARIO"), ("MD7", "LANGGAR FC", "SABAH FC"), ("MD8", "T-REX NAZARIO", "TANGKI FC"), ("MD8", "LANGGAR FC", "SAS FC"), ("MD9", "TANGKI FC", "SABAH FC"), ("MD9", "T-REX NAZARIO", "LANGGAR FC"), ("MD10", "SAS FC", "TANGKI FC"), ("MD10", "SABAH FC", "T-REX NAZARIO")];
+let rows=[], page="home";
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function logo(t){return `<img class="logo" src="${LOGOS[t]}" alt="">`;}
+function parseCSV(text){
+ let out=[], row=[], cell="", q=false;
+ for(let i=0;i<text.length;i++){let ch=text[i],n=text[i+1];
+   if(ch==='"'&&q&&n==='"'){cell+='"';i++;continue}
+   if(ch==='"'){q=!q;continue}
+   if(ch===','&&!q){row.push(cell.trim());cell="";continue}
+   if((ch==='\n'||ch==='\r')&&!q){if(ch==='\r'&&n==='\n')i++;row.push(cell.trim());if(row.some(x=>x!==''))out.push(row);row=[];cell="";continue}
+   cell+=ch;
+ }
+ if(cell||row.length){row.push(cell.trim());out.push(row)}
+ return out;
+}
+function normalize(r){
+ return {md:r[0]||"",home:r[1]||"",away:r[2]||"",hs:r[3]||"",as:r[4]||""};
+}
+function completed(m){return m.home!==""&&m.away!==""&&m.hs!==""&&m.as!==""&&!isNaN(Number(m.hs))&&!isNaN(Number(m.as));}
+function standings(){
+ let s=Object.fromEntries(TEAMS.map(t=>[t,{t,mp:0,w:0,d:0,l:0,gf:0,ga:0,pts:0}]));
+ rows.map(normalize).filter(completed).forEach(m=>{
+  let h=s[m.home],a=s[m.away],x=+m.hs,y=+m.as;if(!h||!a)return;
+  h.mp++;a.mp++;h.gf+=x;h.ga+=y;a.gf+=y;a.ga+=x;
+  if(x>y){h.w++;h.pts+=3;a.l++} else if(x<y){a.w++;a.pts+=3;h.l++} else {h.d++;a.d++;h.pts++;a.pts++}
+ });
+ return Object.values(s).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+}
+function card(title,body,cls=""){return `<section class="card ${cls}"><h2>${title}</h2>${body}</section>`}
+function fixtureCard(f){
+ return `<div class="fixture"><span class="md">${f[0]}</span><div class="team">${logo(f[1])}<b>${esc(f[1])}</b></div><strong>VS</strong><div class="team">${logo(f[2])}<b>${esc(f[2])}</b></div></div>`;
+}
+function render(){
+ document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ document.body.dataset.page=page;
+ const s=standings(), played=rows.map(normalize).filter(completed), next=FIXTURES.find(f=>!played.some(m=>m.home===f[1]&&m.away===f[2]));
+ let content="";
+ if(page==="home"){
+  const top=s[0], nextF=next||FIXTURES[0];
+  content=`<div class="hero"><img src="assets/hero.jpg"><div class="heroShade"></div><div class="heroText"><div class="eyebrow">STADIUM JPPH SANDAKAN</div><h1>SAS PREMIER LEAGUE <em>SEASON 2</em></h1><p>Satu Liga • Satu Semangat</p></div></div>
+  <div class="grid homegrid">
+   ${card("🏆 LEAGUE TABLE",`<div class="miniTable">${s.slice(0,5).map((x,i)=>`<div><span>${i+1}</span>${logo(x.t)}<b>${x.t}</b><strong>${x.pts} PTS</strong></div>`).join("")}</div><button class="gold" data-page="table">LIHAT JADUAL PENUH →</button>`)}
+   ${card("📅 NEXT FIXTURE",fixtureCard(nextF)+`<div class="matchnote">Jadual seterusnya • data diselaraskan secara live</div>`,`featured`)}
+   ${card("⚽ LATEST RESULTS",played.slice(-5).reverse().map(m=>`<div class="result"><span>${m.md}</span><b>${m.home}</b><strong>${m.hs} - ${m.as}</strong><b>${m.away}</b></div>`).join("")||`<div class="empty">Belum ada keputusan.</div>`)}
+  </div>`;
+ } else if(page==="table"){
+  content=`<div class="pagehead"><div><span class="eyebrow">LIVE STANDINGS</span><h1>League Table</h1><p>3 mata menang • 1 mata seri • 0 mata kalah</p></div></div>
+  ${card("🏆 SAS PREMIER LEAGUE SEASON 2",`<div class="tablewrap"><table><thead><tr><th>#</th><th>TEAM</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>PTS</th></tr></thead><tbody>${s.map((x,i)=>`<tr><td><span class="rank">${i+1}</span></td><td class="teamcell">${logo(x.t)}<b>${x.t}</b></td><td>${x.mp}</td><td>${x.w}</td><td>${x.d}</td><td>${x.l}</td><td>${x.gf}</td><td>${x.ga}</td><td>${x.gf-x.ga}</td><td><strong>${x.pts}</strong></td></tr>`).join("")}</tbody></table></div>`)}
+  <div class="notice">🔄 Data dibaca terus daripada Google Sheets. Skor hanya dikira selepas kedua-dua ruang skor diisi.</div>`;
+ } else if(page==="fixtures"){
+  content=`<div class="pagehead"><div><span class="eyebrow">20 MATCHES</span><h1>Fixtures</h1><p>Double round-robin • 10 matchdays</p></div></div><div class="fixturegrid">${FIXTURES.map(f=>fixtureCard(f)).join("")}</div>`;
+ } else if(page==="results"){
+  content=`<div class="pagehead"><div><span class="eyebrow">LIVE RESULTS</span><h1>Results</h1><p>Keputusan yang telah dimasukkan oleh admin</p></div></div><div class="resultsgrid">${played.reverse().map(m=>`<div class="resultBig"><span>${m.md}</span><div>${logo(m.home)}<b>${m.home}</b></div><strong>${m.hs}<small> - </small>${m.as}</strong><div>${logo(m.away)}<b>${m.away}</b></div></div>`).join("")||`<div class="empty">Belum ada keputusan.</div>`}</div>`;
+ } else if(page==="teams"){
+  content=`<div class="pagehead"><div><span class="eyebrow">THE CONTENDERS</span><h1>Teams</h1><p>Lima pasukan • satu kejuaraan</p></div></div><div class="teamsgrid">${TEAMS.map(t=>`<article class="teamcard">${logo(t)}<h2>${t}</h2><p>${t==="T-REX NAZARIO"?"Bigger • Stronger • Together":"Satu pasukan. Satu semangat."}</p><button data-page="table">LIHAT PRESTASI →</button></article>`).join("")}</div>`;
+ } else if(page==="stats"){
+  const goals=played.reduce((n,m)=>n+ +m.hs + +m.as,0);
+  content=`<div class="pagehead"><div><span class="eyebrow">SEASON INSIGHTS</span><h1>Statistics</h1><p>Ringkasan live musim ini</p></div></div><div class="statgrid">${[
+  ["⚽","Goals",""+goals],["🎮","Matches Played",""+played.length],["🏆","Teams",""+TEAMS.length],["🔥","Top Points",""+(s[0]?.pts||0)]
+ ].map(x=>`<div class="statbox"><span>${x[0]}</span><b>${x[2]}</b><small>${x[1]}</small></div>`).join("")}</div>`;
+ } else if(page==="gallery"){
+  content=`<div class="pagehead"><div><span class="eyebrow">VISUALS</span><h1>Gallery</h1><p>Identiti sinematik SAS Premier League Season 2</p></div></div><div class="gallery"><img src="assets/hero.jpg"><div class="gallerycopy"><h2>SATU LIGA • SATU SEMANGAT</h2><p>Stadium JPPH Sandakan</p></div></div>`;
+ } else {
+  content=`<div class="pagehead"><div><span class="eyebrow">ABOUT THE LEAGUE</span><h1>About</h1><p>SAS Premier League Season 2</p></div></div><div class="about card"><h2>⚽ Football Unites Us</h2><p>Web app premium ini direka untuk memaparkan jadual, keputusan, pasukan dan statistik liga secara live.</p><div class="aboutlist"><div>📡 <b>Sumber live</b><span>Google Sheets yang diterbitkan</span></div><div>🔄 <b>Auto refresh</b><span>Setiap 30 saat</span></div><div>📱 <b>Responsive</b><span>Telefon, tablet & PC</span></div><div>🆓 <b>Hosting</b><span>GitHub Pages</span></div></div></div>`;
+ }
+ document.getElementById("app").innerHTML=content;
+ document.querySelectorAll("[data-page]").forEach(x=>x.onclick=()=>{page=x.dataset.page;render();window.scrollTo({top:0,behavior:"smooth"});});
+}
+async function load(){
+ try{
+  const res=await fetch(SHEET_URL+"&t="+Date.now(),{cache:"no-store"});
+  rows=parseCSV(await res.text()).slice(1);
+  document.getElementById("last").textContent="LIVE • "+new Date().toLocaleTimeString("ms-MY",{hour:"2-digit",minute:"2-digit"});
+ }catch(e){document.getElementById("last").textContent="OFFLINE / SEMAK SHEET";}
+ render();
+}
+document.getElementById("hamb").onclick=()=>document.getElementById("nav").classList.toggle("open");
+load(); setInterval(load,30000);
+</script>
+</body></html>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071519"/><stop offset=".55" stop-color="#0d3d42"/><stop offset="1" stop-color="#03070c"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#2ab6aa" stop-opacity=".42"/><stop offset="1" stop-color="#2ab6aa" stop-opacity="0"/></radialGradient>
+ <pattern id="grid" width="70" height="70" patternUnits="userSpaceOnUse"><path d="M70 0H0V70" fill="none" stroke="#fff" stroke-opacity=".035"/></pattern>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<ellipse cx="320" cy="180" rx="430" ry="300" fill="url(#glow)"/>
+<ellipse cx="1280" cy="720" rx="500" ry="350" fill="url(#glow)"/>
+<path d="M-100 720 Q420 450 880 700 T1700 460" fill="none" stroke="#2ab6aa" stroke-opacity=".12" stroke-width="90"/>
+<path d="M-50 840 Q500 590 1050 780 T1700 620" fill="none" stroke="#fff" stroke-opacity=".04" stroke-width="3"/>
+<rect width="1600" height="900" fill="url(#grid)"/>
+<text x="800" y="500" fill="#fff" fill-opacity=".025" font-family="Arial Black,Arial" font-size="170" text-anchor="middle">STATISTICS</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+<defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f8c44f"/><stop offset="1" stop-color="#8b5a00"/></linearGradient></defs>
+<path d="M250 20 305 80 385 92 365 170 445 225 395 290 410 385 320 380 250 470 180 380 90 385 105 290 55 225 135 170 115 92 195 80Z" fill="#07121c" stroke="url(#g)" stroke-width="14"/>
+<path d="M135 245c12-100 78-152 166-116 45 18 77 65 66 105-10 36-42 58-77 61l34 54-46-17-37 53-8-64c-55 1-90-25-98-76Z" fill="#25303a" stroke="#e9b83f" stroke-width="8"/>
+<circle cx="300" cy="195" r="10" fill="#ffd85a"/>
+<path d="M335 220 410 242 344 258Z" fill="#e8edf0"/>
+<path d="M180 235 120 265 184 270Z" fill="#d6dde2"/>
+<text x="250" y="355" fill="#f7c74e" font-size="38" font-family="Arial Black,Arial" text-anchor="middle">T-REX</text>
+<text x="250" y="395" fill="#fff" font-size="30" font-family="Arial Black,Arial" text-anchor="middle">NAZARIO</text>
+</svg>

@@ -1,9 +1,11 @@
-# SAS Premier League Season 2 — Premium Web App
+# SAS Premier League Season 2 — Premium Live Web App
 
-Mobile-first frontend untuk GitHub Pages. Asset logo dan wallpaper berada dalam `assets/`.
+Static GitHub Pages app. Admin updates the published Google Sheet; the website reads the published CSV and refreshes every 30 seconds.
 
-## Publish
-1. Upload semua kandungan folder ini ke repository GitHub.
-2. Pastikan `index.html` berada di root.
-3. GitHub → Settings → Pages → Deploy from a branch → `main` / `(root)` → Save.
-4. Untuk database/score live, sambungkan panel Admin kepada Supabase atau backend pilihan anda.
+## Expected Google Sheet columns
+MATCHDAY, HOME TEAM, AWAY TEAM, HOME SCORE, AWAY SCORE
+
+## Deploy
+Upload the contents of this folder to the root of a public GitHub repository, then enable Settings → Pages → Deploy from a branch → main → /(root).
+
+The app is intentionally static and does not store Google account credentials.
